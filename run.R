@@ -1,5 +1,3 @@
-#!/usr/local/bin/Rscript
-
 library(dplyr)
 library(purrr)
 library(readr)
