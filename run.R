@@ -6,7 +6,6 @@ library(tibble)
 library(igraph)
 source("/cellrouter/CellRouter_Class.R")
 
-set.seed(p$seed)
 
 checkpoints <- list()
 
@@ -15,6 +14,8 @@ checkpoints <- list()
 
 data <- read_rds("/ti/input/data.rds")
 p <- jsonlite::read_json("/ti/input/params.json")
+
+if (length(p$seed) > 0 && is.finite(p$seed)) set.seed(p$seed)
 
 #' @examples
 #' data <- dyntoy::generate_dataset(model = "cyclic") %>% c(., .$prior_information)
@@ -30,19 +31,19 @@ checkpoints$method_afterpreproc <- as.numeric(Sys.time())
 #   ____________________________________________________________________________
 #   Infer trajectory                                                        ####
 # steps are taken from https://github.com/edroaldo/cellrouter/blob/master/Myeloid_Progenitors/CellRouter_Paul_Tutorial.md
-# but it is really hard to follow what is going on, very limited documentation
 cellrouter <- CellRouter(as.data.frame(t(counts)))
 
 cellrouter <- Normalize(cellrouter)
 cellrouter <- scaleData(cellrouter)
 
 # do pca
-cellrouter <- computePCA(cellrouter, num.pcs = p$ndim_pca, seed = p$seed)
+num_pcs <- pmin(p$ndim_pca, ncol(counts) - 1)
+cellrouter <- computePCA(cellrouter, num.pcs = num_pcs, seed = p$seed)
 
-# do tsne
-if (p$max_iter == "Inf") {p$max_iter <- 100000}
 
 # do safe tsne
+if (p$max_iter == "Inf") {p$max_iter <- 100000}
+
 again <- TRUE
 while(again) {
   tryCatch({
@@ -63,11 +64,10 @@ while(again) {
 }
 
 # louvain clustering
-# cellrouter <- findClusters(cellrouter, method='model.clustering', num.pcs = 15) # this gives errors of rgba values
-cellrouter <- findClusters(cellrouter, method = "graph.clustering", num.pcs = p$ndim_pca_clustering, k = p$k_clustering) # alarm, seed setting...!
+cellrouter <- findClusters(cellrouter, method = "graph.clustering", num.pcs = min(p$ndim_pca_clustering, num_pcs), k = p$k_clustering)
 
 # do knn
-cellrouter <- buildKNN(cellrouter, k = p$k_knn, column.ann = 'population', num.pcs = p$ndim_pca_knn, sim.type = p$sim_type)
+cellrouter <- buildKNN(cellrouter, k = p$k_knn, column.ann = 'population', num.pcs = min(p$ndim_pca_knn, num_pcs), sim.type = p$sim_type)
 
 # create trajectory using start cells as source
 outputdir <- "/ti/workspace/"
