@@ -6,6 +6,8 @@ library(tibble)
 library(igraph)
 source("/cellrouter/CellRouter_Class.R")
 
+set.seed(p$seed)
+
 checkpoints <- list()
 
 #   ____________________________________________________________________________
@@ -35,11 +37,30 @@ cellrouter <- Normalize(cellrouter)
 cellrouter <- scaleData(cellrouter)
 
 # do pca
-cellrouter <- computePCA(cellrouter, num.pcs = p$ndim_pca, seed = 42) # alarm, seed setting...!
+cellrouter <- computePCA(cellrouter, num.pcs = p$ndim_pca, seed = p$seed)
 
 # do tsne
 if (p$max_iter == "Inf") {p$max_iter <- 100000}
-cellrouter <- computeTSNE(cellrouter, num.pcs = p$ndim_tsne, seed = 42, max_iter = p$max_iter, perplexity = p$perplexity)
+
+# do safe tsne
+again <- TRUE
+while(again) {
+  tryCatch({
+
+    cellrouter <- computeTSNE(cellrouter, num.pcs = p$ndim_tsne, seed = p$seed, max_iter = p$max_iter, perplexity = p$perplexity)
+    again <- FALSE
+  }, error = function(e) {
+    if (grepl("Perplexity is too large", e$message)) {
+      # don't forget both <<-'s, otherwise this will result in an infinite loop
+      again <<- TRUE
+      cat("TSNE: Perplexity is too large. Reducing perplexity by 25%: ", p$perplexity, " -> ", p$perplexity * .75, "\n", sep = "")
+      p$perplexity <<- p$perplexity * .75
+
+    } else {
+      stop(e)
+    }
+  })
+}
 
 # louvain clustering
 # cellrouter <- findClusters(cellrouter, method='model.clustering', num.pcs = 15) # this gives errors of rgba values
