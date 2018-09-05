@@ -71,9 +71,9 @@ cellrouter <- buildKNN(cellrouter, k = p$k_knn, column.ann = 'population', num.p
 
 # create trajectory using start cells as source
 outputdir <- "/ti/workspace/"
-dir.create(outputdir, recursive = TRUE)
+dir.create(outputdir, recursive = TRUE, showWarnings = FALSE)
 filename <- file.path(outputdir, "cell_edge_weighted_network.txt")
-write.table(cellrouter@graph$edges, file = filename, sep='\t', row.names = FALSE, col.names = FALSE, quote = FALSE)
+write.table(cellrouter@graph$edges, file = filename, sep = '\t', row.names = FALSE, col.names = FALSE, quote = FALSE)
 
 sources <- unique(cellrouter@sampTab$population[cellrouter@sampTab$sample_id %in% start_id])
 targets <- setdiff(as.vector(cellrouter@sampTab$population), sources)
@@ -136,7 +136,7 @@ dimred <- cellrouter@tsne %>% as.data.frame() %>% rownames_to_column("cell_id")
 # save
 write_feather(tibble(cell_ids = unique(c(cell_graph$from, cell_graph$to))), "/ti/output/cell_ids.feather")
 write_feather(cell_graph, "/ti/output/cell_graph.feather")
-write_feather(tibble(to_keep=to_keep), "/ti/output/to_keep.feather")
+write_feather(tibble(to_keep = to_keep), "/ti/output/to_keep.feather")
 write_feather(dimred, "/ti/output/dimred.feather")
 
 # timings
