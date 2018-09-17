@@ -3,7 +3,7 @@ container_url: https://github.com/dynverse/ti_cellrouter
 docker_repository: dynverse/ti_cellrouter
 singularity_collection: 1535
 name: CellRouter
-type: algorithm
+source: tool
 platform: R
 parameters:
   ndim_pca:
