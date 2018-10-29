@@ -6,7 +6,7 @@ RUN git clone https://github.com/edroaldo/cellrouter.git && find cellrouter -typ
 
 RUN apt-get update && apt-get install -y default-jre
 
-LABEL version 0.1.3
+LABEL version 0.1.5
 
 ADD . /code
 ENTRYPOINT Rscript /code/run.R
