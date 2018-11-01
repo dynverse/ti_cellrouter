@@ -8,7 +8,7 @@ Bootstrap: shub
 From: dynverse/dynwrap:bioc
 
 %labels
-    version 0.1.6
+    version 0.1.7
 
 %files
     . /code
@@ -16,7 +16,6 @@ From: dynverse/dynwrap:bioc
 %post
     chmod -R 755 '/code'
     R -e 'devtools::install_cran(c("reshape", "reshape2", "pheatmap", "tsne", "igraph", "ggplot2", "mclust", "Rtsne", "cccd", "irlba"))'
-    R -e 'devtools::install_github("cran/grid")'
     git clone https://github.com/edroaldo/cellrouter.git && find cellrouter -type f | grep -v "^cellrouter/CellRouter" | xargs rm
     apt-get update && apt-get install -y default-jre
 
