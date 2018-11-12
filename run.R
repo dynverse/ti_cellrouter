@@ -133,11 +133,12 @@ to_keep <- backbone_cells
 # dimred
 dimred <- cellrouter@tsne %>% as.data.frame() %>% rownames_to_column("cell_id")
 
-# save
-write_feather(tibble(cell_ids = unique(c(cell_graph$from, cell_graph$to))), "/ti/output/cell_ids.feather")
-write_feather(cell_graph, "/ti/output/cell_graph.feather")
-write_feather(tibble(to_keep = to_keep), "/ti/output/to_keep.feather")
-write_feather(dimred, "/ti/output/dimred.feather")
-
-# timings
-write_feather(enframe(checkpoints, "name", "timings") %>% mutate(timings = as.numeric(timings)), "/ti/output/timings.feather")
+# save output
+output <- lst(
+  cell_ids = tibble(cell_ids = unique(c(cell_graph$from, cell_graph$to))),
+  cell_graph,
+  to_keep,
+  dimred,
+  timings = checkpoints
+)
+write_rds(output, "/ti/output/output.rds")

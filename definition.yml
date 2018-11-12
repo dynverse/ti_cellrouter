@@ -108,7 +108,7 @@ input:
   - counts
   - start_id
 output:
-  format: feather
+  format: rds
   outputs:
   - cell_graph
   - dimred
