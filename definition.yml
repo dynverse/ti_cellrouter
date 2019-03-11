@@ -108,13 +108,12 @@ parameters:
       upper: 100
   - id: sim_type
     description: Similarity type for knn
-    type: discrete
+    type: character
     default: jaccard
     values: jaccard
-    tunable: no
   - id: distance_method_paths
     description: Distance method for paths
-    type: discrete
+    type: character
     default: graph
     values:
     - euclidean
@@ -125,7 +124,7 @@ parameters:
     - graph
   - id: ranks
     description: How to rank the paths
-    type: discrete
+    type: character
     default: rank
     values:
     - path_cost

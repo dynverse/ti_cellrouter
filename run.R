@@ -2,17 +2,15 @@
 
 library(dyncli, warn.conflicts = FALSE)
 
-checkpoints <- list()
-
 #####################################
 ###           LOAD DATA           ###
 #####################################
 
+# load data
 task <- dyncli::main()
 
 params <- task$params
-expression <- task$expression %>% as.matrix
-
+expression <- as.matrix(task$expression)
 start_id <- task$priors$start_id
 
 # load software
@@ -21,11 +19,9 @@ library(dplyr, warn.conflicts = FALSE)
 library(purrr, warn.conflicts = FALSE)
 library(dynwrap, warn.conflicts = FALSE)
 library(tibble, warn.conflicts = FALSE)
-# library(igraph)
 
-libdir <- "/cellrouter"
-# libdir <- "ti_cellrouter/cellrouter"
-source(paste0(libdir, "/CellRouter_Class.R"))
+cellrouter_root <- "/cellrouter"
+source(paste0(cellrouter_root, "/CellRouter_Class.R"))
 
 # TIMING: done with preproc
 timings <- list(method_afterpreproc = Sys.time())
@@ -43,7 +39,7 @@ num_pcs <- pmin(params$ndim_pca, ncol(expression) - 1)
 cellrouter <- computePCA(cellrouter, num.pcs = num_pcs, seed = NULL) # seed is set by dyncli
 
 # do safe tsne
-if (p$max_iter == "Inf") {
+if (params$max_iter == "Inf") {
   params$max_iter <- 100000
 }
 
@@ -96,13 +92,15 @@ write.table(cellrouter@graph$edges, file = filename, sep = '\t', row.names = FAL
 sources <- unique(cellrouter@sampTab$population[cellrouter@sampTab$sample_id %in% start_id])
 targets <- setdiff(as.vector(cellrouter@sampTab$population), sources)
 
+# this function uses global variables...
+libdir <- paste0(cellrouter_root, "/CellRouter")
 cellrouter <- findPaths(
   cellrouter,
   column = 'population',
   libdir,
   outputdir,
   method = params$distance_method_paths
-) # this function uses global variables...
+)
 
 # process trajectories
 cellrouter <- processTrajectories(
@@ -115,7 +113,7 @@ cellrouter <- processTrajectories(
   column.color = 'colors'
 )
 
-checkpoints$method_aftermethod <- as.numeric(Sys.time())
+timings$method_aftermethod <- as.numeric(Sys.time())
 
 #####################################
 ###     SAVE OUTPUT TRAJECTORY    ###
@@ -137,7 +135,7 @@ backbone_network <-
 
 # now get for every non-backbone cell the shortest backbone cell
 backbone_cells <- unique(c(backbone_network$from, backbone_network$to))
-nonbackbone_cells <- setdiff(rownames(counts), backbone_cells)
+nonbackbone_cells <- setdiff(rownames(expression), backbone_cells)
 
 nonbackbone_network <-
   distances(cellrouter@graph$network, backbone_cells, nonbackbone_cells) %>%
@@ -177,7 +175,7 @@ output <-
     to_keep = to_keep
   )  %>%
   add_timings(
-    timings = checkpoints
+    timings = timings
   )
 
 dyncli::write_output(output, task$output)

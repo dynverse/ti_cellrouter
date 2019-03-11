@@ -8,4 +8,4 @@ RUN apt-get update && apt-get install -y default-jre
 
 COPY run.R example.R definition.yml /code/
 
-ENTRYPOINT /code/run.R
+ENTRYPOINT ["/code/run.R"]
