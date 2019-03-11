@@ -1,19 +1,9 @@
 #!/usr/local/bin/Rscript
 
-library(dyncli, warn.conflicts = FALSE)
-
-#####################################
-###           LOAD DATA           ###
-#####################################
-
-# load data
 task <- dyncli::main()
 
-params <- task$params
-expression <- as.matrix(task$expression)
-start_id <- task$priors$start_id
-
 # load software
+library(dyncli, warn.conflicts = FALSE)
 library(readr, warn.conflicts = FALSE)
 library(dplyr, warn.conflicts = FALSE)
 library(purrr, warn.conflicts = FALSE)
@@ -22,6 +12,15 @@ library(tibble, warn.conflicts = FALSE)
 
 cellrouter_root <- "/cellrouter"
 source(paste0(cellrouter_root, "/CellRouter_Class.R"))
+
+#####################################
+###           LOAD DATA           ###
+#####################################
+
+# load data
+params <- task$params
+expression <- as.matrix(task$expression)
+start_id <- task$priors$start_id
 
 # TIMING: done with preproc
 timings <- list(method_afterpreproc = Sys.time())
@@ -113,7 +112,7 @@ cellrouter <- processTrajectories(
   column.color = 'colors'
 )
 
-timings$method_aftermethod <- as.numeric(Sys.time())
+timings$method_aftermethod <- Sys.time()
 
 #####################################
 ###     SAVE OUTPUT TRAJECTORY    ###

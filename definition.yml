@@ -67,7 +67,7 @@ parameters:
       upper: 100000
   - id: cluster_method
     description: Method to use for clustering
-    type: discrete
+    type: character
     values:
     - graph.clustering
     - model.clustering
