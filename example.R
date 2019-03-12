@@ -6,8 +6,12 @@ data <- dyntoy::generate_dataset(
   id = "specific_example/cellrouter",
   num_cells = 200,
   num_features = 300,
-  model = "tree"
+  model = "tree",
+  normalise = FALSE
 )
+set.seed(1)
+data$counts@x <- rpois(length(data$counts@x), 10)
+data$expression@x <- runif(length(data$expression@x))
 
 # add method specific args (if needed)
 data$params <- list()
