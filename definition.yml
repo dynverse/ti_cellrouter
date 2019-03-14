@@ -35,7 +35,6 @@ wrapper:
   - multifurcation
   - binary_tree
   - tree
-  example: /code/example.R
   input_required:
   - expression
   - start_id
