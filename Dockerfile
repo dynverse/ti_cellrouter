@@ -6,6 +6,6 @@ RUN git clone --depth 1 https://github.com/edroaldo/cellrouter.git && find cellr
 
 RUN apt-get update && apt-get install -y default-jre
 
-COPY run.R example.sh definition.yml /code/
+COPY definition.yml run.R example.sh /code/
 
 ENTRYPOINT ["/code/run.R"]
