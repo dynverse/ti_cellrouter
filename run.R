@@ -18,7 +18,7 @@ source(paste0(cellrouter_root, "/CellRouter_Class.R"))
 #####################################
 
 # load data
-params <- task$params
+parameters <- task$parameters
 expression <- as.matrix(task$expression)
 start_id <- task$priors$start_id
 
@@ -34,12 +34,12 @@ cellrouter <- CellRouter(as.data.frame(t(expression)))
 cellrouter <- scaleData(cellrouter)
 
 # do pca
-num_pcs <- pmin(params$ndim_pca, ncol(expression) - 1)
+num_pcs <- pmin(parameters$ndim_pca, ncol(expression) - 1)
 cellrouter <- computePCA(cellrouter, num.pcs = num_pcs, seed = NULL) # seed is set by dyncli
 
 # do safe tsne
-if (params$max_iter == "Inf") {
-  params$max_iter <- 100000
+if (parameters$max_iter == "Inf") {
+  parameters$max_iter <- 100000
 }
 
 again <- TRUE
@@ -47,9 +47,9 @@ while (again) {
   tryCatch({
     cellrouter <- computeTSNE(
       cellrouter,
-      num.pcs = params$ndim_tsne,
-      max_iter = params$max_iter,
-      perplexity = params$perplexity,
+      num.pcs = parameters$ndim_tsne,
+      max_iter = parameters$max_iter,
+      perplexity = parameters$perplexity,
       seed = NULL
     )
     again <- FALSE
@@ -57,8 +57,8 @@ while (again) {
     if (grepl("Perplexity is too large", e$message)) {
       # don't forget both <<-'s, otherwise this will result in an infinite loop
       again <<- TRUE
-      cat("TSNE: Perplexity is too large. Reducing perplexity by 25%: ", params$perplexity, " -> ", params$perplexity * .75, "\n", sep = "")
-      params$perplexity <<- params$perplexity * .75
+      cat("TSNE: Perplexity is too large. Reducing perplexity by 25%: ", parameters$perplexity, " -> ", parameters$perplexity * .75, "\n", sep = "")
+      parameters$perplexity <<- parameters$perplexity * .75
     } else {
       stop(e)
     }
@@ -69,17 +69,17 @@ while (again) {
 cellrouter <- findClusters(
   cellrouter,
   method = "graph.clustering",
-  num.pcs = min(params$ndim_pca_clustering, num_pcs),
-  k = params$k_clustering
+  num.pcs = min(parameters$ndim_pca_clustering, num_pcs),
+  k = parameters$k_clustering
 )
 
 # do knn
 cellrouter <- buildKNN(
   cellrouter,
-  k = params$k_knn,
+  k = parameters$k_knn,
   column.ann = 'population',
-  num.pcs = min(params$ndim_pca_knn, num_pcs),
-  sim.type = params$sim_type
+  num.pcs = min(parameters$ndim_pca_knn, num_pcs),
+  sim.type = parameters$sim_type
 )
 
 # create trajectory using start cells as source
@@ -98,16 +98,16 @@ cellrouter <- findPaths(
   column = 'population',
   libdir,
   outputdir,
-  method = params$distance_method_paths
+  method = parameters$distance_method_paths
 )
 
 # process trajectories
 cellrouter <- processTrajectories(
   cellrouter,
   rownames(cellrouter@ndata),
-  path.rank = params$ranks,
-  num.cells = params$num_cells,
-  neighs = params$neighs,
+  path.rank = parameters$ranks,
+  num.cells = parameters$num_cells,
+  neighs = parameters$neighs,
   column.ann = 'population',
   column.color = 'colors'
 )
