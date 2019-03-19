@@ -12,7 +12,7 @@ data <- dyntoy::generate_dataset(
 set.seed(1)
 
 # add method specific args (if needed)
-data$params <- list()
+data$parameters <- list()
 data$seed <- 1
 
 # write example dataset to file
