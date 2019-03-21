@@ -4,9 +4,9 @@
 set.seed(1)
 data <- dyntoy::generate_dataset(
   id = "specific_example/cellrouter",
-  num_cells = 1000,
+  num_cells = 200,
   num_features = 300,
-  model = "tree",
+  model = "linear",
   normalise = FALSE
 )
 
