@@ -30,7 +30,7 @@ timings <- list(method_afterpreproc = Sys.time())
 #####################################
 
 # steps are taken from https://github.com/edroaldo/cellrouter/blob/master/Myeloid_Progenitors/CellRouter_Paul_Tutorial.md
-cellrouter <- CellRouter(as.data.frame(t(expression)))
+cellrouter <- CellRouter(as.data.frame(Matrix::t(expression)))
 cellrouter <- scaleData(cellrouter)
 
 # do pca
